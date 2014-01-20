@@ -1,0 +1,7 @@
+package com.egelon.cardioassistant;
+
+import SensorEventListener;
+
+public class StepDetector extends SensorEventListener {
+
+}

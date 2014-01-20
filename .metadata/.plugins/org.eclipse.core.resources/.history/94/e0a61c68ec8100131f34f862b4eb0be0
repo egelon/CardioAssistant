@@ -1,0 +1,5 @@
+package com.egelon.cardioassistant;
+
+public interface StepListener {
+
+}

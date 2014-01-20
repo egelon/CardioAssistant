@@ -1,10 +1,8 @@
 package com.egelon.cardioassistant;
 
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.app.Activity;
 import android.content.Intent;
-import android.text.format.Time;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -51,6 +49,11 @@ public class MainActivity extends Activity {
     	Intent mServiceIntent = new Intent(this, PedometerBackgroundWorker.class);
     	//start the service
     	startService(mServiceIntent);
+    }
+    
+    public void resetSteps () 
+    {
+    	
     }
     
 }

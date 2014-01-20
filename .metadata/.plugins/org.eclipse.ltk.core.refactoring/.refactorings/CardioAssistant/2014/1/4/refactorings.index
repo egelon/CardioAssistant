@@ -2,3 +2,14 @@
 1390223394986	Extracts string 'null' into R.string.steps_taken_label
 1390223456344	Extracts string 'null' into R.string.steps_taken_counter
 1390224877314	Rename field 'dataString'
+1390235138063	Delete element
+1390235568735	Rename field 'mSteps'
+1390239092434	Change Layout
+1390239214260	Extracts string 'null' into R.string.accelerometer_X
+1390239231860	Extracts string 'null' into R.string.accelerometer_Y
+1390239245341	Extracts string 'null' into R.string.accelerometer_Z
+1390239296572	Change Layout
+1390239552238	Rename field 'startPedometerButton'
+1390239631013	Extracts string 'null' into R.string.reset_pedometer
+1390239891390	Rename field 'TableLayout1'
+1390240033377	Extracts string 'null' into R.string.text_current_sensitivity

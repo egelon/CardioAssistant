@@ -1,0 +1,15 @@
+package com.egelon.cardioassistant;
+
+import android.os.AsyncTask;
+
+private class UpdateNotificationAsyncTask extends AsyncTask<Integer, Integer, Boolean> {
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Boolean doInBackground(Integer... params) {
+        updateNotification(params[0]);
+        return true;
+    }
+}

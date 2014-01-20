@@ -7,5 +7,10 @@
     <string name="start_pedometer">Start pedometer</string>
     <string name="steps_taken_label">"Steps taken since start : "</string>
     <string name="steps_taken_counter">0</string>
+    <string name="accelerometer_X">X</string>
+    <string name="accelerometer_Y">Y</string>
+    <string name="accelerometer_Z">Z</string>
+    <string name="reset_pedometer">Reset count</string>
+    <string name="text_current_sensitivity">0</string>
 
 </resources>

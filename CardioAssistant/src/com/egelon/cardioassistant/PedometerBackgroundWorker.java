@@ -1,6 +1,8 @@
 package com.egelon.cardioassistant;
 
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
@@ -8,16 +10,21 @@ import java.util.logging.Logger;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 
-public class PedometerBackgroundWorker extends Service {
+public class PedometerBackgroundWorker extends Service implements StepListener{
 	
 	public PedometerBackgroundWorker() {
 		super();
@@ -27,7 +34,9 @@ public class PedometerBackgroundWorker extends Service {
 	private static final Logger logger = Logger.getLogger(PedometerBackgroundWorker.class.getSimpleName());
 	
 	private static SensorManager sensorManager = null;
-    //private static StepDetector stepDetector = null;
+	private static Sensor mAccelerometer = null;
+	
+    private static StepDetector stepDetector = null;
 
     private static PowerManager powerManager = null;
     private static WakeLock wakeLock = null;
@@ -36,9 +45,9 @@ public class PedometerBackgroundWorker extends Service {
     
     private static Intent passedIntent = null;
 	
-    //private static List<IStepServiceCallback> mCallbacks = new ArrayList<IStepServiceCallback>();
+    private static List<IStepServiceCallback> mCallbacks = new ArrayList<IStepServiceCallback>();
     
-    private static int mSteps = 0;
+    private static int numberOfSteps = 0;
     private static boolean running = false;
     
     private static int NOTIFY = 0x1001;
@@ -64,16 +73,19 @@ public class PedometerBackgroundWorker extends Service {
         //and acquire it
         if (!wakeLock.isHeld()) 
         	wakeLock.acquire();
-/*
+
         if (stepDetector == null) {
             stepDetector = StepDetector.getInstance();
             stepDetector.addStepListener(this);
         }
-*/
+
         //get an instance of the Sensor Manager
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         //register our custom listener to the accelerator sensor with the GAME sensor delay
-        //sensorManager.registerListener(stepDetector, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
+        
+        sensorManager.registerListener(stepDetector, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
+
         running = true;
     }
 	
@@ -92,11 +104,16 @@ public class PedometerBackgroundWorker extends Service {
         
         
         //first we build our notification
+		//can't be swiped away, ongoing event, max priority, blinking golden light when screen is off
         NotificationCompat.Builder mBuilder =
         	    new NotificationCompat.Builder(this)
         	    .setSmallIcon(R.drawable.ic_launcher)
         	    .setContentTitle("Pedometer started.")
-        	    .setContentText("Status : Running");
+        	    .setContentText("Status : Running")
+        	    .setAutoCancel(false)
+        	    .setOngoing(true)
+        	    .setLights(0xffffcc00, 300, 100)
+        	    .setPriority(Notification.PRIORITY_MAX);
         
         //now we set the notification ID
         int mNotificationId = 001;
@@ -109,11 +126,140 @@ public class PedometerBackgroundWorker extends Service {
         notificationManager.notify(mNotificationId, mBuilder.build());
         
     }
+	
+	private void updateNotification(int steps)
+	{
+        if (!updating.compareAndSet(false, true)) return;
 
+        notification.number = steps;
+        notification.when = System.currentTimeMillis();
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, passedIntent, 0);
+        notification.setLatestEventInfo(this, getText(R.string.app_name), "Total steps: " + steps, contentIntent);
+        notificationManager.notify(NOTIFY, notification);
+
+        updating.set(false);
+    }
+	
+	@Override
+    public void onDestroy() 
+	{
+        super.onDestroy();
+        logger.info("onDestroy");
+        running = false;
+        numberOfSteps = 0;
+
+        notificationManager.cancel(NOTIFY);
+        if (wakeLock.isHeld()) wakeLock.release();
+        sensorManager.unregisterListener(stepDetector);
+
+        notificationManager.cancel(NOTIFY);
+    }
+	
+	@Override
+    public void onStart(Intent intent, int startId) 
+	{
+        //super.onStart(intent, startId);
+        //logger.info("onStart");
+
+        passedIntent = intent;
+        Bundle extras = passedIntent.getExtras();
+        if (extras != null) {
+            NOTIFY = extras.getInt("int");
+        }
+
+        // Work around a bug where notif number has to be > 0
+        updateNotification((numberOfSteps > 0) ? numberOfSteps : 1);
+        notificationManager.notify(NOTIFY, notification);
+    }
+	
 
 	@Override
-	public IBinder onBind(Intent arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public void onStep() {
+		logger.info("onStep()");
+        numberOfSteps++;
+
+        if (!updating.get()) {
+            UpdateNotificationAsyncTask update = new UpdateNotificationAsyncTask();
+            update.doInBackground(numberOfSteps);
+        }
+
+        if (mCallbacks != null) {
+            List<IStepServiceCallback> callbacksToRemove = null;
+            for (IStepServiceCallback mCallback : mCallbacks)
+            {
+                try {
+                    mCallback.stepsChanged(numberOfSteps);
+                } catch (RemoteException e) {
+                    // Remove old callbacks if they failed to unbind
+                    callbacksToRemove = new ArrayList<IStepServiceCallback>();
+                    callbacksToRemove.add(mCallback);
+                    e.printStackTrace();
+                }
+            }
+            if (callbacksToRemove != null) {
+                for (IStepServiceCallback mCallback : callbacksToRemove) 
+                {
+                    mCallbacks.remove(mCallback);
+                }
+            }
+        }
 	}
+	
+	
+	private class UpdateNotificationAsyncTask extends AsyncTask<Integer, Integer, Boolean> {
+
+	    /**
+	     * {@inheritDoc}
+	     */
+	    @Override
+	    protected Boolean doInBackground(Integer... params) {
+	        updateNotification(params[0]);
+	        return true;
+	    }
+	}
+	
+	private final IStepService.Stub mBinder = new IStepService.Stub() {
+
+        @Override
+        public boolean isRunning() throws RemoteException {
+            return running;
+        }
+
+        @Override
+        public void setSensitivity(int sens) throws RemoteException {
+            logger.info("setSensitivity: " + sens);
+            StepDetector.setSensitivity(sens);
+        }
+
+        @Override
+        public void registerCallback(IStepServiceCallback cb) throws RemoteException {
+            if (cb == null) return;
+
+            logger.info("registerCallback: " + cb.toString());
+            cb.stepsChanged(numberOfSteps);
+            if (!mCallbacks.contains(cb)) mCallbacks.add(cb);
+        }
+
+        @Override
+        public void unregisterCallback(IStepServiceCallback cb) throws RemoteException {
+            if (cb == null) return;
+
+            logger.info("unregisterCallback: " + cb.toString());
+            if (mCallbacks.contains(cb)) mCallbacks.remove(cb);
+        }
+    };
+
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        logger.info("onBind()");
+        return mBinder;
+    }
+	
+	
 }
+
+
+
+
+
