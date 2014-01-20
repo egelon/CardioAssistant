@@ -1,0 +1,4 @@
+1390223222117	Extracts string 'null' into R.string.start_pedometer
+1390223394986	Extracts string 'null' into R.string.steps_taken_label
+1390223456344	Extracts string 'null' into R.string.steps_taken_counter
+1390224877314	Rename field 'dataString'
