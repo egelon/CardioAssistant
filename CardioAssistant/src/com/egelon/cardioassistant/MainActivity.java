@@ -1,14 +1,11 @@
 package com.egelon.cardioassistant;
 
 import android.os.Bundle;
-import android.os.IBinder;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,10 +18,10 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity 
 {
-	private PedometerBackgroundService pedometerService;
+	//private PedometerBackgroundService pedometerService;
 
-	MyReceiver myReceiver = null;
-	Intent mServiceIntent;
+	private MyReceiver myReceiver = null;
+	private Intent mServiceIntent;
 	static final String LOG_TAG = "CA_MainActivity";
 	
 	//accelerometer values
@@ -147,9 +144,10 @@ public class MainActivity extends Activity
     	  unregisterReceiver (myReceiver);
     }
     
-	private class MyReceiver extends BroadcastReceiver
+	private final class MyReceiver extends BroadcastReceiver
 	{
-		static final String Log_Tag = "MyReceiver";
+		static final String LOG_TAG = "MyReceiver";
+		//public MyReceiver() { super(); };
         @Override
         public void onReceive(Context arg0, Intent arg1)
         {
@@ -163,28 +161,7 @@ public class MainActivity extends Activity
         	textViewX.setText(y);
         	textViewX.setText(z);
         	textViewSteps.setText(stepsTaken);
-
-        }
-
-	}	
-    
-    
-    
-    /*
-    //service connection via direct binding through mConnection
-    private ServiceConnection mConnection = new ServiceConnection() 
-    {
-    	@Override
-        public void onServiceConnected(ComponentName className, IBinder binder)
-    	{
-    		PedometerBackgroundService.MyBinder b = (PedometerBackgroundService.MyBinder) binder;
-    		pedometerService = b.getService();
-          //Toast.makeText(MainActivity.this, "Connected", Toast.LENGTH_SHORT).show();
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-        	pedometerService = null;
         }
 	};
-*/
+	
 }
