@@ -1,0 +1,7 @@
+package com.egelon.cardioassistant;
+
+import BroadcastReciever;
+
+public class MyPedometerServiceReciever extends BroadcastReciever {
+
+}

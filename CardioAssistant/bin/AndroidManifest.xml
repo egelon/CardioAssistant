@@ -26,7 +26,15 @@
             </intent-filter>
         </activity>
         
-        <service android:name="PedometerBackgroundWorker" />
+        <service android:name=".PedometerBackgroundService"
+                 android:label="CardioAssistant Pedometer Service"
+         />
+
+        <receiver android:name=".MyReceiver">
+            <intent-filter>
+                <action android:name="com.egelon.cardioassistant.PedometerBackgroundService.MY_ACTION"></action>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

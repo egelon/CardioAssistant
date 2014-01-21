@@ -12,5 +12,6 @@
     <string name="accelerometer_Z">Z</string>
     <string name="reset_pedometer">Reset count</string>
     <string name="text_current_sensitivity">0</string>
+    <string name="exit_application">Exit application</string>
 
 </resources>
