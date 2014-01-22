@@ -125,20 +125,13 @@
             android:id="@+id/seekBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" 
-            android:max="40"/>
-
-    </TableRow>
-
-    <TableRow
-        android:id="@+id/tableRow6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+            android:layout_weight="1"
+            android:max="200"/>
 
         <TextView
             android:id="@+id/textSensitivity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="top"
             android:text="@string/text_current_sensitivity"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 

@@ -1,0 +1,280 @@
+package com.egelon.cardioassistant;
+
+import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.util.Log;
+import android.widget.Toast;
+
+public class PedometerBackgroundService extends Service
+{	
+	//sensor manager
+	private SensorManager sensorManager;
+	private float acceleration;
+	
+	//values for calculation
+	private float previousX;
+	private float currentX;
+	
+	private float previousY;
+	private float currentY;
+	
+	private float previousZ;
+	private float currentZ;
+	
+	private int numSteps;
+	private int threshold;
+	
+	final static String MY_ACTION = "com.egelon.cardioassistant.PedometerBackgroundService.MY_ACTION";
+	static final String LOG_TAG = "CA_PedometerService";
+	static Intent intent = new Intent(MY_ACTION);
+	
+	
+	//=====================================
+	private BroadcastReceiver resetStepsReceiver = new BroadcastReceiver ()
+	{
+		static final String LOG_TAG = "MyReceiver";
+
+        @Override
+        public void onReceive(Context arg0, Intent arg1)
+        {
+        	Log.d( LOG_TAG, "onReceive" );
+        	
+        	Bundle extras = arg1.getExtras();
+        	if(extras != null)
+        	{
+        		setThreshold(extras.getInt("threshold_val"));
+        		setNumSteps(extras.getInt("numSteps_val"));
+        	}
+        	Toast.makeText(arg0, "threshold:"+threshold+"; numSteps reset", Toast.LENGTH_SHORT).show();
+        }
+	};
+	IntentFilter resetStepsIntentFilter = new IntentFilter();
+	
+	//=====================================
+	private BroadcastReceiver setThresholdReceiver = new BroadcastReceiver ()
+	{
+		static final String LOG_TAG = "setThresholdReceiver";
+
+        @Override
+        public void onReceive(Context arg0, Intent arg1)
+        {
+        	Log.d( LOG_TAG, "onReceive" );
+        	
+        	Bundle extras = arg1.getExtras();
+        	if(extras != null)
+        	{
+        		setThreshold(extras.getInt("newThreshold_val"));
+        	}
+        	Toast.makeText(arg0, "new threshold:"+threshold, Toast.LENGTH_SHORT).show();
+        }
+	};
+	IntentFilter setThresholdIntentFilter = new IntentFilter();
+	
+
+    
+	@Override
+    public void onCreate() {
+		Log.d( LOG_TAG, "onCreate" );
+        // code to execute when the service is first created
+		
+		previousY = 0;
+		currentY = 0;
+		setNumSteps(0);
+		acceleration = 0.00f;
+		
+		threshold = 2;
+		
+		//enable the listener
+		enableAccelerometerListening();
+    }
+	
+	public int onStartCommand(Intent intent, int flags, int startId) 
+	{
+        super.onStartCommand(intent, flags, startId);
+        if (intent != null) 
+        {
+            Bundle bundle = intent.getExtras();
+            threshold = bundle.getInt("threshold_val");
+        }
+        Toast.makeText(getApplicationContext(), "threshold:"+threshold, Toast.LENGTH_SHORT).show();
+        
+        //bind intent receivers
+        resetStepsIntentFilter.addAction(MainActivity.RESET_STEPS);
+	    registerReceiver(resetStepsReceiver, resetStepsIntentFilter);
+	    
+	    setThresholdIntentFilter.addAction(MainActivity.SET_THRESHOLD);
+	    registerReceiver(setThresholdReceiver, setThresholdIntentFilter);
+        
+        return START_STICKY;
+	}
+	
+	private void enableAccelerometerListening ()
+    {
+    	//get a sensor service instance from the OS
+    	sensorManager = (SensorManager) getSystemService (Context.SENSOR_SERVICE);
+    	//register a listener for the sensor events
+    	sensorManager.registerListener(sensorEventListener,  sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    @Override
+    public void onDestroy() {
+        sensorManager.unregisterListener(sensorEventListener);
+        super.onDestroy();
+    }
+    
+    
+
+  //event handler for sensor events
+  	private SensorEventListener sensorEventListener = new SensorEventListener()
+  	{
+  		@Override
+  		public void onSensorChanged (SensorEvent event)
+  		{
+  			
+  			/*
+  			
+  			
+  			//get the acceleration values from the accelerometer
+  			float x = event.values[0];
+  			float y = event.values[1];
+  			float z = event.values[2];
+  			
+  			//store the current y value
+  			currentX = x;
+  			currentY = y;
+  			currentZ = z;
+  			
+  			//Measure if step is taken
+  			if ( (Math.abs(currentY) > 4.1 && Math.abs(currentY) < 7.6) && (Math.abs(currentX) > 1.4 && Math.abs(currentX) < 3.4))
+  			{
+  				setNumSteps(getNumSteps() + 1);
+  			}
+  			
+  			//store the previous y
+  			previousX = x;
+  			previousY = y;
+  			previousZ = z;
+  			*/
+  			boolean detecting = false;
+
+  		    int mLimit = 11.15;
+
+  		    float mLastValues[] = new float[3 * 2];
+  		    float mScale[] = new float[2];
+  		    float mYOffset = 0;
+
+  		    float mLastDirections[] = new float[3 * 2];
+  		    float mLastExtremes[][] = { new float[3 * 2], new float[3 * 2] };
+  		    float mLastDiff[] = new float[3 * 2];
+  		    int mLastMatch = -1;
+  		    
+  		  int h = 480;
+          mYOffset = h * 0.5f;
+          mScale = new float[2];
+          mScale[0] = -(h * 0.5f * (1.0f / (SensorManager.STANDARD_GRAVITY * 2)));
+          mScale[1] = -(h * 0.5f * (1.0f / (SensorManager.MAGNETIC_FIELD_EARTH_MAX)));
+          
+  		        if (event == null)
+  		        	throw new NullPointerException();
+
+  		        detecting = true;
+
+  		        float vSum = 0;
+  		        for (int i = 0; i < 3; i++) 
+  		        {
+  		            final float v = mYOffset + event.values[i] * mScale[0];
+  		            vSum += v;
+  		        }
+  		        int k = 0;
+  		        float v = vSum / 3;
+
+  		        float direction = (v > mLastValues[k] ? 1 : (v < mLastValues[k] ? -1 : 0));
+  		        if (direction == -mLastDirections[k])
+  		        {
+  		            // Direction changed
+  		            int extType = (direction > 0 ? 0 : 1); // minumum or maximum?
+  		            mLastExtremes[extType][k] = mLastValues[k];
+  		            float diff = Math.abs(mLastExtremes[extType][k] - mLastExtremes[1 - extType][k]);
+
+  		            if (diff > mLimit) 
+  		            {
+  		                boolean isAlmostAsLargeAsPrevious = diff > (mLastDiff[k] * 2 / 3);
+  		                boolean isPreviousLargeEnough = mLastDiff[k] > (diff / 3);
+  		                boolean isNotContra = (mLastMatch != 1 - extType);
+
+  		                if (isAlmostAsLargeAsPrevious && isPreviousLargeEnough && isNotContra)
+  		                {
+  		                	setNumSteps(getNumSteps() + 1);
+  		                    
+  		                    mLastMatch = extType;
+  		                } 
+  		                else 
+  		                {
+  		                    mLastMatch = -1;
+  		                }
+  		            }
+  		            mLastDiff[k] = diff;
+  		        }
+  		        mLastDirections[k] = direction;
+  		        mLastValues[k] = v;
+
+  		        detecting = false;
+  			
+  			
+  			//Toast.makeText(PedometerBackgroundService.this, "values x:"+x+",y:"+y+",z:"+z, Toast.LENGTH_SHORT).show();
+
+  			Bundle extras = new Bundle();
+  			extras.putString("x_val", String.valueOf(event.values[0]));
+  			extras.putString("y_val", String.valueOf(event.values[1]));
+  			extras.putString("z_val", String.valueOf(event.values[2]));
+  			extras.putInt("numSteps_val", getNumSteps());
+  			
+  			intent.putExtras(extras);
+  			
+  		    sendBroadcast(intent);
+  		}
+
+  		@Override
+  		public void onAccuracyChanged(Sensor arg0, int arg1) {
+  			// TODO Auto-generated method stub
+  			
+  		}
+  	};
+    
+
+	public int getNumSteps() {
+		return numSteps;
+	}
+
+	public void setNumSteps(int numSteps) {
+		this.numSteps = numSteps;
+	}
+	
+	public int getThreshold() {
+		return threshold;
+	}
+
+	public void setThreshold(int threshold) {
+		this.threshold = threshold;
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+}
+
+
+
+
+

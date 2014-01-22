@@ -21,8 +21,15 @@ public class PedometerBackgroundService extends Service
 	private float acceleration;
 	
 	//values for calculation
+	private float previousX;
+	private float currentX;
+	
 	private float previousY;
 	private float currentY;
+	
+	private float previousZ;
+	private float currentZ;
+	
 	private int numSteps;
 	private int threshold;
 	
@@ -84,7 +91,7 @@ public class PedometerBackgroundService extends Service
 		setNumSteps(0);
 		acceleration = 0.00f;
 		
-		threshold = 2;
+		threshold = 20;
 		
 		//enable the listener
 		enableAccelerometerListening();
@@ -105,7 +112,7 @@ public class PedometerBackgroundService extends Service
 	    registerReceiver(resetStepsReceiver, resetStepsIntentFilter);
 	    
 	    setThresholdIntentFilter.addAction(MainActivity.SET_THRESHOLD);
-	    registerReceiver(setThresholdReceiver, resetStepsIntentFilter);
+	    registerReceiver(setThresholdReceiver, setThresholdIntentFilter);
         
         return START_STICKY;
 	}
@@ -115,7 +122,8 @@ public class PedometerBackgroundService extends Service
     	//get a sensor service instance from the OS
     	sensorManager = (SensorManager) getSystemService (Context.SENSOR_SERVICE);
     	//register a listener for the sensor events
-    	sensorManager.registerListener(sensorEventListener,  sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_GAME);
+    	sensorManager.registerListener(sensorEventListener,  sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+    	mInitialized = false;
     }
 
     @Override
@@ -124,42 +132,126 @@ public class PedometerBackgroundService extends Service
         super.onDestroy();
     }
     
-    
+    private boolean mInitialized = false;;
 
+    
+    
+    private double mLastX;
+    private double mLastY;
+    private double mLastZ;
+    private final float NOISE = (float) 2.5;
   //event handler for sensor events
   	private SensorEventListener sensorEventListener = new SensorEventListener()
   	{
   		@Override
-  		public void onSensorChanged (SensorEvent sensorEvent)
+  		public void onSensorChanged (SensorEvent event)
   		{
+  			
+  			/*
+  			
+  			
   			//get the acceleration values from the accelerometer
-  			float x = sensorEvent.values[0];
-  			float y = sensorEvent.values[1];
-  			float z = sensorEvent.values[2];
+  			float x = event.values[0];
+  			float y = event.values[1];
+  			float z = event.values[2];
   			
   			//store the current y value
+  			currentX = x;
   			currentY = y;
+  			currentZ = z;
   			
   			//Measure if step is taken
-  			if(Math.abs(currentY - previousY) > threshold)
+  			if ( (Math.abs(currentY) > 4.1 && Math.abs(currentY) < 7.6) && (Math.abs(currentX) > 1.4 && Math.abs(currentX) < 3.4))
   			{
   				setNumSteps(getNumSteps() + 1);
   			}
   			
   			//store the previous y
+  			previousX = x;
   			previousY = y;
-  			
+  			previousZ = z;
+  			*/
+  			 // event object contains values of acceleration, read those
+  			 double x = event.values[0];
+  			 double y = event.values[1];
+  			 double z = event.values[2];
+  			 
+  			 final double alpha = 0.8; // constant for our filter below
+  			 
+  			double[] gravity = {0,0,0};
+  			 
+  			 // Isolate the force of gravity with the low-pass filter.
+  			 gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0];
+  			 gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
+  			 gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
+  			 
+  			// Remove the gravity contribution with the high-pass filter.
+  			 x = event.values[0] - gravity[0];
+  			 y = event.values[1] - gravity[1];
+  			 z = event.values[2] - gravity[2];
+  			 
+  			if (mInitialized == false) 
+  			{
+  			 //sensor is used for the first time, initialize the last read values
+  			 mLastX = x;
+  			 mLastY = y;
+  			 mLastZ = z;
+  			 mInitialized = true;
+  			 } 
+  			else
+  			{
+  			 // sensor is already initialized, and we have previously read values.
+  			 // take difference of past and current values and decide which
+  			 // axis acceleration was detected by comparing values
+  			 
+  			double deltaX = Math.abs(mLastX - x);
+  			 double deltaY = Math.abs(mLastY - y);
+  			 double deltaZ = Math.abs(mLastZ - z);
+  			 if (deltaX < NOISE)
+  			 deltaX = (float) 0.0;
+  			 if (deltaY < NOISE)
+  			 deltaY = (float) 0.0;
+  			 if (deltaZ < NOISE)
+  			 deltaZ = (float) 0.0;
+  			 mLastX = x;
+  			 mLastY = y;
+  			 mLastZ = z;
+  			 
+  			 /*
+  			if (deltaX > deltaY) {
+  			 // Horizontal shake
+  			 // do something here if you like
+  			 
+  			} else if (deltaY > deltaX) {
+  			 // Vertical shake
+  			 // do something here if you like
+  			 
+  			} else if ((deltaZ > deltaX) && (deltaZ > deltaY)) {
+  			 // Z shake
+  			 //stepsCount = stepsCount + 1;
+  			 //if (stepsCount > 0) {
+  			 //txtCount.setText(String.valueOf(stepsCount));
+  			 //}
+  				setNumSteps(getNumSteps() + 1);
+  			}
+  			*/
+  			 
+  			 if(deltaX > deltaY)
+  			 {
+  				setNumSteps(getNumSteps() + 1);
+  			 }
   			//Toast.makeText(PedometerBackgroundService.this, "values x:"+x+",y:"+y+",z:"+z, Toast.LENGTH_SHORT).show();
 
   			Bundle extras = new Bundle();
-  			extras.putString("x_val", String.valueOf(x));
-  			extras.putString("y_val", String.valueOf(y));
-  			extras.putString("z_val", String.valueOf(z));
+  			extras.putString("x_val", String.valueOf(event.values[0]));
+  			extras.putString("y_val", String.valueOf(event.values[1]));
+  			extras.putString("z_val", String.valueOf(event.values[2]));
   			extras.putInt("numSteps_val", getNumSteps());
   			
   			intent.putExtras(extras);
   			
   		    sendBroadcast(intent);
+  		}
   		}
 
   		@Override

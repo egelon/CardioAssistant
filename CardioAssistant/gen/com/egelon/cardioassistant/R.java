@@ -25,7 +25,7 @@ public final class R {
     }
     public static final class id {
         public static final int MainLayout=0x7f080000;
-        public static final int action_settings=0x7f080012;
+        public static final int action_settings=0x7f080011;
         public static final int buttonExit=0x7f08000d;
         public static final int buttonReset=0x7f080009;
         public static final int buttonStart=0x7f08000b;
@@ -37,9 +37,8 @@ public final class R {
         public static final int tableRow3=0x7f080008;
         public static final int tableRow4=0x7f08000a;
         public static final int tableRow5=0x7f08000e;
-        public static final int tableRow6=0x7f080010;
         public static final int tableRow7=0x7f08000c;
-        public static final int textSensitivity=0x7f080011;
+        public static final int textSensitivity=0x7f080010;
         public static final int textViewX=0x7f080002;
         public static final int textViewY=0x7f080003;
         public static final int textViewZ=0x7f080004;

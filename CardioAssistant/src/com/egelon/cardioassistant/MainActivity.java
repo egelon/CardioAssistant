@@ -120,9 +120,11 @@ public class MainActivity extends Activity
         seekBar = (SeekBar) findViewById(R.id.seekBar);
         
         //initialize value for seekBar
-        seekBar.setProgress(10);
+        threshold = 20;
+        
+        seekBar.setProgress(threshold);
         seekBar.setOnSeekBarChangeListener(seekBarListener);
-        threshold = 10;
+        
         textViewSensitivity.setText(String.valueOf(threshold));
         
         mServiceIntent = new Intent(this, PedometerBackgroundService.class);
