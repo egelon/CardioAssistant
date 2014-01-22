@@ -41,7 +41,7 @@ public class PedometerBackgroundService extends Service
 		setNumSteps(0);
 		acceleration = 0.00f;
 		
-		threshold = 2;
+		threshold = 10;
 		
 		//enable the listener
 		enableAccelerometerListening();

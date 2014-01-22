@@ -29,25 +29,18 @@ public class MainActivity extends Activity
         public void onReceive(Context arg0, Intent arg1)
         {
         	Log.d( LOG_TAG, "onReceive" );
-        	
-        	Bundle extras = arg1.getExtras();
-        	if(extras != null)
-        	{
-        	
-        	
-        	String x = extras.getString("x_val");
-        	String y = extras.getString("y_val");  
-        	String z = extras.getString("z_val");
-        	//String stepsTaken = arg1.getStringExtra("numSteps_val");
-        	String stepsTaken = extras.getString("numSteps_val");
+        	String x = arg1.getStringExtra("x_val");
+        	String y = arg1.getStringExtra("y_val");  
+        	String z = arg1.getStringExtra("z_val");
+        	String stepsTaken = arg1.getStringExtra("numSteps_val");
         	
         	textViewX.setText(x);
-        	textViewY.setText(y);
-        	textViewZ.setText(z);
+        	textViewX.setText(y);
+        	textViewX.setText(z);
         	textViewSteps.setText(stepsTaken);
         	
-        	}
-        	//Toast.makeText(arg0, "values x:"+x+",y:"+y+",z:"+z, Toast.LENGTH_SHORT).show();
+        	
+        	Toast.makeText(arg0, "values x:"+x+",y:"+y+",z:"+z, Toast.LENGTH_SHORT).show();
         }
 	};
 	IntentFilter intentFilter = new IntentFilter();

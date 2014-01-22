@@ -9,4 +9,4 @@ logcat.view.colsize.TID=50
 logcat.view.colsize.Tag=107
 logcat.view.colsize.Text=543
 logcat.view.colsize.Time=130
-logcat.view.filters.list=name\: 'InfoCustomLogger', tag\: '', text\: '', pid\: '', app\: '', level\: 'info', 
+logcat.view.filters.list=name\: 'Pedometer service', tag\: 'CA_PedometerService', text\: '', pid\: '', app\: '', level\: 'info', 

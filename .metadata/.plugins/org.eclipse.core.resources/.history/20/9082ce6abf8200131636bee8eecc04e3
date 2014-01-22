@@ -28,6 +28,11 @@
                  android:label="CardioAssistant Pedometer Service"
          />
 
+        <receiver android:name="mainActivity.MyReceiver" android:enabled="true">
+            <intent-filter>
+                <action android:name="com.egelon.cardioassistant.PedometerBackgroundService.MY_ACTION"></action>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

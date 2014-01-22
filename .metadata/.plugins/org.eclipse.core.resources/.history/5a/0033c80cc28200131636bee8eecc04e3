@@ -7,10 +7,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 public class PedometerBackgroundService extends Service
 {	
@@ -41,10 +39,11 @@ public class PedometerBackgroundService extends Service
 		setNumSteps(0);
 		acceleration = 0.00f;
 		
-		threshold = 2;
+		threshold = 10;
 		
 		//enable the listener
 		enableAccelerometerListening();
+		//intent.setAction(MY_ACTION);
     }
 	
 	private void enableAccelerometerListening ()
@@ -86,20 +85,10 @@ public class PedometerBackgroundService extends Service
   			//store the previous y
   			previousY = y;
   			
-  			//Toast.makeText(PedometerBackgroundService.this, "values x:"+x+",y:"+y+",z:"+z, Toast.LENGTH_SHORT).show();
-  			/*
-  			intent.putExtra("x_val", String.valueOf(x));
-  			intent.putExtra("y_val", String.valueOf(y));
-  			intent.putExtra("z_val", String.valueOf(z));
-  			intent.putExtra("numSteps_val", String.valueOf(getNumSteps()));
-  			*/
-  			Bundle extras = new Bundle();
-  			extras.putString("x_val", String.valueOf(x));
-  			extras.putString("y_val", String.valueOf(y));
-  			extras.putString("z_val", String.valueOf(z));
-  			extras.putString("numSteps_val", String.valueOf(getNumSteps()));
-  			
-  			intent.putExtras(extras);
+  			intent.putExtra("com.egelon.PedometerService.x_val", x);
+  			intent.putExtra("com.egelon.PedometerService.y_val", y);
+  			intent.putExtra("com.egelon.PedometerService.z_val", z);
+  			intent.putExtra("com.egelon.PedometerService.numSteps_val", getNumSteps());
   			
   		    sendBroadcast(intent);
   		}

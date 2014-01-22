@@ -21,7 +21,7 @@ public class MainActivity extends Activity
 {
 	//private PedometerBackgroundService pedometerService;
 
-	private BroadcastReceiver myReceiver = new BroadcastReceiver ()
+	private BroadcastReceiver myReceiver = new BroadcastReceiver
 	{
 		static final String LOG_TAG = "MyReceiver";
 
@@ -29,28 +29,22 @@ public class MainActivity extends Activity
         public void onReceive(Context arg0, Intent arg1)
         {
         	Log.d( LOG_TAG, "onReceive" );
-        	
-        	Bundle extras = arg1.getExtras();
-        	if(extras != null)
-        	{
-        	
-        	
-        	String x = extras.getString("x_val");
-        	String y = extras.getString("y_val");  
-        	String z = extras.getString("z_val");
-        	//String stepsTaken = arg1.getStringExtra("numSteps_val");
-        	String stepsTaken = extras.getString("numSteps_val");
+        	String x = arg1.getStringExtra("com.egelon.PedometerService.x_val");
+        	String y = arg1.getStringExtra("com.egelon.PedometerService.y_val");  
+        	String z = arg1.getStringExtra("com.egelon.PedometerService.z_val");
+        	String stepsTaken = arg1.getStringExtra("com.egelon.PedometerService.numSteps_val");
         	
         	textViewX.setText(x);
-        	textViewY.setText(y);
-        	textViewZ.setText(z);
+        	textViewX.setText(y);
+        	textViewX.setText(z);
         	textViewSteps.setText(stepsTaken);
         	
-        	}
-        	//Toast.makeText(arg0, "values x:"+x+",y:"+y+",z:"+z, Toast.LENGTH_SHORT).show();
+        	System.out.println("TEEST");
+        	
+        	Toast.makeText(arg0, "IN DA BroadCASTER", Toast.LENGTH_LONG).show();
         }
 	};
-	IntentFilter intentFilter = new IntentFilter();
+	
 	
 	
 	
@@ -171,13 +165,14 @@ public class MainActivity extends Activity
       //Intent intent= new Intent(this, PedometerBackgroundService.class);
       //bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
       //Register BroadcastReceiver to receive accelerometer data from service
-      //if (myReceiver == null)
-      //{
-	            
+      if (myReceiver == null)
+      {
+	      myReceiver = new MyReceiver();
+	      IntentFilter intentFilter = new IntentFilter();      
 	      intentFilter.addAction(PedometerBackgroundService.MY_ACTION);
 	      //startService(mServiceIntent);
 	      registerReceiver(myReceiver, intentFilter);
-      //}
+      }
       Log.d(LOG_TAG, "onResume");
     }
 
@@ -187,23 +182,8 @@ public class MainActivity extends Activity
       Log.d(LOG_TAG, "onPause");
       //unbindService(mConnection);
       stopService(mServiceIntent);
-      
-      try {
+      if (myReceiver != null)
     	  unregisterReceiver (myReceiver);
-      }
-      catch (IllegalArgumentException e) 
-      {
-    	    if (e.getMessage().contains("Receiver not registered")) 
-    	    {
-    	        // Ignore this exception. This is exactly what is desired
-    	        Log.w(LOG_TAG,"Tried to unregister the reciver when it's not registered");
-    	    } 
-    	    else
-    	    {
-    	        // unexpected, re-throw
-    	        throw e;
-    	    }
-    	}
     }
     
     @Override
