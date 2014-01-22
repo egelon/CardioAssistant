@@ -72,8 +72,8 @@ public class MainActivity extends Activity
 	final static String RESET_STEPS = "com.egelon.cardioassistant.MainActivity.RESET_STEPS";
 	private Intent mResetSteps = new Intent(RESET_STEPS);
 	
-	final static String SET_THRESHOLD = "com.egelon.cardioassistant.MainActivity.SET_THRESHOLD";
-	private Intent mSetTreshold = new Intent(SET_THRESHOLD);
+	//final static String SET_THRESHOLD = "com.egelon.cardioassistant.MainActivity.SET_THRESHOLD";
+	private Intent mSetTreshold = new Intent(this, resetStepsReceiver.class);
 	
 	static final String LOG_TAG = "CA_MainActivity";
 	
@@ -248,10 +248,7 @@ public class MainActivity extends Activity
 			threshold = seekBar.getProgress();
 			textViewSensitivity.setText(String.valueOf(threshold));
 			
-			Bundle extras = new Bundle();
-	    	extras.putInt("newThreshold_val", threshold);
-	    	mSetTreshold.putExtras(extras);
-	    	sendBroadcast(mSetTreshold);
+			
 		}
 
 		@Override
@@ -263,7 +260,10 @@ public class MainActivity extends Activity
 		@Override
 		public void onStopTrackingTouch(SeekBar arg0) {
 			// TODO Auto-generated method stub
-			
+			Bundle extras = new Bundle();
+	    	extras.putInt("threshold_val", threshold);
+	    	mSetTreshold.putExtras(extras);
+	    	sendBroadcast(mSetTreshold);
 		}
     	
     };

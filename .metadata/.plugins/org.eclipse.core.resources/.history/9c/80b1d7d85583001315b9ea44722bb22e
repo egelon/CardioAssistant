@@ -31,7 +31,7 @@ public class PedometerBackgroundService extends Service
 	static Intent intent = new Intent(MY_ACTION);
 	
 	
-	//=====================================
+	
 	private BroadcastReceiver resetStepsReceiver = new BroadcastReceiver ()
 	{
 		static final String LOG_TAG = "MyReceiver";
@@ -52,27 +52,11 @@ public class PedometerBackgroundService extends Service
 	};
 	IntentFilter resetStepsIntentFilter = new IntentFilter();
 	
-	//=====================================
-	private BroadcastReceiver setThresholdReceiver = new BroadcastReceiver ()
-	{
-		static final String LOG_TAG = "setThresholdReceiver";
-
-        @Override
-        public void onReceive(Context arg0, Intent arg1)
-        {
-        	Log.d( LOG_TAG, "onReceive" );
-        	
-        	Bundle extras = arg1.getExtras();
-        	if(extras != null)
-        	{
-        		setThreshold(extras.getInt("newThreshold_val"));
-        	}
-        	Toast.makeText(arg0, "new threshold:"+threshold, Toast.LENGTH_SHORT).show();
-        }
-	};
-	IntentFilter setThresholdIntentFilter = new IntentFilter();
+	
+	
 	
 
+    //public PedometerBackgroundService() { super(); } 
     
 	@Override
     public void onCreate() {
@@ -100,12 +84,8 @@ public class PedometerBackgroundService extends Service
         }
         Toast.makeText(getApplicationContext(), "threshold:"+threshold, Toast.LENGTH_SHORT).show();
         
-        //bind intent receivers
         resetStepsIntentFilter.addAction(MainActivity.RESET_STEPS);
 	    registerReceiver(resetStepsReceiver, resetStepsIntentFilter);
-	    
-	    setThresholdIntentFilter.addAction(MainActivity.SET_THRESHOLD);
-	    registerReceiver(setThresholdReceiver, resetStepsIntentFilter);
         
         return START_STICKY;
 	}

@@ -65,7 +65,7 @@ public class PedometerBackgroundService extends Service
         	Bundle extras = arg1.getExtras();
         	if(extras != null)
         	{
-        		setThreshold(extras.getInt("newThreshold_val"));
+        		setThreshold(extras.getInt("threshold_val"));
         	}
         	Toast.makeText(arg0, "new threshold:"+threshold, Toast.LENGTH_SHORT).show();
         }

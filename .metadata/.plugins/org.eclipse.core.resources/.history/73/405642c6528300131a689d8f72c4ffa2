@@ -248,10 +248,7 @@ public class MainActivity extends Activity
 			threshold = seekBar.getProgress();
 			textViewSensitivity.setText(String.valueOf(threshold));
 			
-			Bundle extras = new Bundle();
-	    	extras.putInt("newThreshold_val", threshold);
-	    	mSetTreshold.putExtras(extras);
-	    	sendBroadcast(mSetTreshold);
+			
 		}
 
 		@Override
@@ -263,7 +260,10 @@ public class MainActivity extends Activity
 		@Override
 		public void onStopTrackingTouch(SeekBar arg0) {
 			// TODO Auto-generated method stub
-			
+			Bundle extras = new Bundle();
+	    	extras.putInt("threshold_val", threshold);
+	    	mSetTreshold.putExtras(extras);
+	    	sendBroadcast(mSetTreshold);
 		}
     	
     };
