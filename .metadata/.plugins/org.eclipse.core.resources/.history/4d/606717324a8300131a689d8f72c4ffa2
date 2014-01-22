@@ -1,10 +1,8 @@
 package com.egelon.cardioassistant;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -30,31 +28,6 @@ public class PedometerBackgroundService extends Service
 	static final String LOG_TAG = "CA_PedometerService";
 	static Intent intent = new Intent(MY_ACTION);
 	
-	
-	
-	private BroadcastReceiver resetStepsReceiver = new BroadcastReceiver ()
-	{
-		static final String LOG_TAG = "MyReceiver";
-
-        @Override
-        public void onReceive(Context arg0, Intent arg1)
-        {
-        	Log.d( LOG_TAG, "onReceive" );
-        	
-        	Bundle extras = arg1.getExtras();
-        	if(extras != null)
-        	{
-        		setThreshold(extras.getInt("threshold_val"));
-        		setNumSteps(extras.getInt("numSteps_val"));
-        	}
-        	Toast.makeText(arg0, "threshold:"+threshold+"; numSteps reset", Toast.LENGTH_SHORT).show();
-        }
-	};
-	IntentFilter intentFilter = new IntentFilter();
-	
-	
-	
-	
 
     //public PedometerBackgroundService() { super(); } 
     
@@ -73,22 +46,6 @@ public class PedometerBackgroundService extends Service
 		//enable the listener
 		enableAccelerometerListening();
     }
-	
-	public int onStartCommand(Intent intent, int flags, int startId) 
-	{
-        super.onStartCommand(intent, flags, startId);
-        if (intent != null) 
-        {
-            Bundle bundle = intent.getExtras();
-            threshold = bundle.getInt("threshold_val");
-        }
-        Toast.makeText(getApplicationContext(), "threshold:"+threshold, Toast.LENGTH_SHORT).show();
-        
-        intentFilter.addAction(MainActivity.RESET_STEPS);
-	    registerReceiver(resetStepsReceiver, intentFilter);
-        
-        return START_STICKY;
-	}
 	
 	private void enableAccelerometerListening ()
     {
@@ -130,12 +87,17 @@ public class PedometerBackgroundService extends Service
   			previousY = y;
   			
   			//Toast.makeText(PedometerBackgroundService.this, "values x:"+x+",y:"+y+",z:"+z, Toast.LENGTH_SHORT).show();
-
+  			/*
+  			intent.putExtra("x_val", String.valueOf(x));
+  			intent.putExtra("y_val", String.valueOf(y));
+  			intent.putExtra("z_val", String.valueOf(z));
+  			intent.putExtra("numSteps_val", String.valueOf(getNumSteps()));
+  			*/
   			Bundle extras = new Bundle();
   			extras.putString("x_val", String.valueOf(x));
   			extras.putString("y_val", String.valueOf(y));
   			extras.putString("z_val", String.valueOf(z));
-  			extras.putInt("numSteps_val", getNumSteps());
+  			extras.putString("numSteps_val", String.valueOf(getNumSteps()));
   			
   			intent.putExtras(extras);
   			

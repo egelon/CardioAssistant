@@ -68,13 +68,6 @@ public class MainActivity extends Activity
 	
 	
 	private Intent mServiceIntent;
-	
-	final static String RESET_STEPS = "com.egelon.cardioassistant.MainActivity.RESET_STEPS";
-	private Intent mResetSteps = new Intent(RESET_STEPS);
-	
-	final static String SET_THRESHOLD = "com.egelon.cardioassistant.MainActivity.SET_THRESHOLD";
-	private Intent mSetTreshold = new Intent(SET_THRESHOLD);
-	
 	static final String LOG_TAG = "CA_MainActivity";
 	
 	//accelerometer values
@@ -98,6 +91,7 @@ public class MainActivity extends Activity
 	//SeekBar
 	private SeekBar seekBar;
 	private int threshold;
+	private OnSeekBarChangeListener seekBarListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,8 +177,8 @@ public class MainActivity extends Activity
     	Bundle extras = new Bundle();
     	extras.putInt("threshold_val", threshold);
     	extras.putInt("numSteps_val", 0);
-    	mResetSteps.putExtras(extras);
-    	sendBroadcast(mResetSteps);
+    	mServiceIntent.putExtras(extras);
+    	sendBroadcast(mServiceIntent);
     	
     }
     
@@ -240,32 +234,22 @@ public class MainActivity extends Activity
     }
     
     
-    private OnSeekBarChangeListener seekBarListener = new OnSeekBarChangeListener()
-    {
-
-		@Override
-		public void onProgressChanged(SeekBar arg0, int arg1, boolean arg2) {
-			threshold = seekBar.getProgress();
-			textViewSensitivity.setText(String.valueOf(threshold));
-			
-			
-		}
-
-		@Override
-		public void onStartTrackingTouch(SeekBar arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void onStopTrackingTouch(SeekBar arg0) {
-			// TODO Auto-generated method stub
-			Bundle extras = new Bundle();
-	    	extras.putInt("threshold_val", threshold);
-	    	mSetTreshold.putExtras(extras);
-	    	sendBroadcast(mSetTreshold);
-		}
-    	
-    };
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+	//public class MyReceiver extends 
 	
 }

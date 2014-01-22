@@ -39,12 +39,12 @@ public class MainActivity extends Activity
         	String y = extras.getString("y_val");  
         	String z = extras.getString("z_val");
         	//String stepsTaken = arg1.getStringExtra("numSteps_val");
-        	numSteps = extras.getInt("numSteps_val");
+        	String stepsTaken = extras.getString("numSteps_val");
         	
         	textViewX.setText(x);
         	textViewY.setText(y);
         	textViewZ.setText(z);
-        	textViewSteps.setText(String.valueOf(numSteps));
+        	textViewSteps.setText(stepsTaken);
         	
         	}
         	//Toast.makeText(arg0, "values x:"+x+",y:"+y+",z:"+z, Toast.LENGTH_SHORT).show();
@@ -68,13 +68,6 @@ public class MainActivity extends Activity
 	
 	
 	private Intent mServiceIntent;
-	
-	final static String RESET_STEPS = "com.egelon.cardioassistant.MainActivity.RESET_STEPS";
-	private Intent mResetSteps = new Intent(RESET_STEPS);
-	
-	final static String SET_THRESHOLD = "com.egelon.cardioassistant.MainActivity.SET_THRESHOLD";
-	private Intent mSetTreshold = new Intent(SET_THRESHOLD);
-	
 	static final String LOG_TAG = "CA_MainActivity";
 	
 	//accelerometer values
@@ -87,10 +80,9 @@ public class MainActivity extends Activity
 	
 	//steps taken
 	private TextView textViewSteps;
-	private int numSteps;
 	
 	//reset pedometer button
-	//private Button buttonReset;
+	private Button buttonReset;
 	
 	//exit app button
 	private Button buttonExit;
@@ -98,6 +90,7 @@ public class MainActivity extends Activity
 	//SeekBar
 	private SeekBar seekBar;
 	private int threshold;
+	private OnSeekBarChangeListener seekBarListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,9 +105,8 @@ public class MainActivity extends Activity
         textViewSensitivity = (TextView) findViewById(R.id.textSensitivity);
         
         textViewSteps = (TextView) findViewById(R.id.stepsTakenCounterLabel);
-        numSteps = 0;
         
-        //buttonReset = (Button) findViewById(R.id.buttonReset);
+        buttonReset = (Button) findViewById(R.id.buttonReset);
         buttonExit = (Button) findViewById(R.id.buttonExit);
         
         seekBar = (SeekBar) findViewById(R.id.seekBar);
@@ -163,29 +155,16 @@ public class MainActivity extends Activity
     	 */
     	//mServiceIntent = new Intent(this, PedometerBackgroundService.class);
     	//start the service
-    	Bundle extras = new Bundle();
-    	extras.putInt("threshold_val", threshold);
-    	extras.putInt("numSteps_val", numSteps);
-    	mServiceIntent.putExtras(extras);
-    	
-    	//mServiceIntent.putExtra("threshold_val", threshold);
-    	//mServiceIntent.putExtra("numSteps_val", numSteps);
+    	mServiceIntent.putExtra("threshold_val", String.valueOf(threshold));
     	startService(mServiceIntent);
     	Log.d(LOG_TAG, "StartPedometerService");
     }
     
-    public void ResetSteps (View view) 
+    public void resetSteps () 
     {
     	//pedometerService.setNumSteps(0);
     	//textViewSteps.setText(String.valueOf(pedometerService.getNumSteps()));
     	Log.d(LOG_TAG, "resetSteps");
-    	
-    	Bundle extras = new Bundle();
-    	extras.putInt("threshold_val", threshold);
-    	extras.putInt("numSteps_val", 0);
-    	mResetSteps.putExtras(extras);
-    	sendBroadcast(mResetSteps);
-    	
     }
     
     @Override
@@ -194,13 +173,13 @@ public class MainActivity extends Activity
       //Intent intent= new Intent(this, PedometerBackgroundService.class);
       //bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
       //Register BroadcastReceiver to receive accelerometer data from service
-      //if (myReceiver == null)
-      //{
+      if (myReceiver == null)
+      {
 	            
 	      intentFilter.addAction(PedometerBackgroundService.MY_ACTION);
 	      //startService(mServiceIntent);
 	      registerReceiver(myReceiver, intentFilter);
-      //}
+      }
       Log.d(LOG_TAG, "onResume");
     }
 
@@ -240,32 +219,22 @@ public class MainActivity extends Activity
     }
     
     
-    private OnSeekBarChangeListener seekBarListener = new OnSeekBarChangeListener()
-    {
-
-		@Override
-		public void onProgressChanged(SeekBar arg0, int arg1, boolean arg2) {
-			threshold = seekBar.getProgress();
-			textViewSensitivity.setText(String.valueOf(threshold));
-			
-			
-		}
-
-		@Override
-		public void onStartTrackingTouch(SeekBar arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void onStopTrackingTouch(SeekBar arg0) {
-			// TODO Auto-generated method stub
-			Bundle extras = new Bundle();
-	    	extras.putInt("threshold_val", threshold);
-	    	mSetTreshold.putExtras(extras);
-	    	sendBroadcast(mSetTreshold);
-		}
-    	
-    };
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+	//public class MyReceiver extends 
 	
 }

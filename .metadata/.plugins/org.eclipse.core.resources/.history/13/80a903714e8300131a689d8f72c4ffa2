@@ -32,7 +32,7 @@ public class PedometerBackgroundService extends Service
 	
 	
 	
-	private BroadcastReceiver resetStepsReceiver = new BroadcastReceiver ()
+	private BroadcastReceiver myReceiver = new BroadcastReceiver ()
 	{
 		static final String LOG_TAG = "MyReceiver";
 
@@ -45,9 +45,9 @@ public class PedometerBackgroundService extends Service
         	if(extras != null)
         	{
         		setThreshold(extras.getInt("threshold_val"));
-        		setNumSteps(extras.getInt("numSteps_val"));
+        	
         	}
-        	Toast.makeText(arg0, "threshold:"+threshold+"; numSteps reset", Toast.LENGTH_SHORT).show();
+        	Toast.makeText(arg0, "threshold:"+threshold, Toast.LENGTH_SHORT).show();
         }
 	};
 	IntentFilter intentFilter = new IntentFilter();
@@ -83,10 +83,6 @@ public class PedometerBackgroundService extends Service
             threshold = bundle.getInt("threshold_val");
         }
         Toast.makeText(getApplicationContext(), "threshold:"+threshold, Toast.LENGTH_SHORT).show();
-        
-        intentFilter.addAction(MainActivity.RESET_STEPS);
-	    registerReceiver(resetStepsReceiver, intentFilter);
-        
         return START_STICKY;
 	}
 	
@@ -135,7 +131,7 @@ public class PedometerBackgroundService extends Service
   			extras.putString("x_val", String.valueOf(x));
   			extras.putString("y_val", String.valueOf(y));
   			extras.putString("z_val", String.valueOf(z));
-  			extras.putInt("numSteps_val", getNumSteps());
+  			extras.putString("numSteps_val", String.valueOf(getNumSteps()));
   			
   			intent.putExtras(extras);
   			

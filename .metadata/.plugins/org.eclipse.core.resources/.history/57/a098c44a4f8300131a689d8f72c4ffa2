@@ -68,13 +68,6 @@ public class MainActivity extends Activity
 	
 	
 	private Intent mServiceIntent;
-	
-	final static String RESET_STEPS = "com.egelon.cardioassistant.MainActivity.RESET_STEPS";
-	private Intent mResetSteps = new Intent(RESET_STEPS);
-	
-	final static String SET_THRESHOLD = "com.egelon.cardioassistant.MainActivity.SET_THRESHOLD";
-	private Intent mSetTreshold = new Intent(SET_THRESHOLD);
-	
 	static final String LOG_TAG = "CA_MainActivity";
 	
 	//accelerometer values
@@ -90,7 +83,7 @@ public class MainActivity extends Activity
 	private int numSteps;
 	
 	//reset pedometer button
-	//private Button buttonReset;
+	private Button buttonReset;
 	
 	//exit app button
 	private Button buttonExit;
@@ -98,6 +91,7 @@ public class MainActivity extends Activity
 	//SeekBar
 	private SeekBar seekBar;
 	private int threshold;
+	private OnSeekBarChangeListener seekBarListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,7 +108,7 @@ public class MainActivity extends Activity
         textViewSteps = (TextView) findViewById(R.id.stepsTakenCounterLabel);
         numSteps = 0;
         
-        //buttonReset = (Button) findViewById(R.id.buttonReset);
+        buttonReset = (Button) findViewById(R.id.buttonReset);
         buttonExit = (Button) findViewById(R.id.buttonExit);
         
         seekBar = (SeekBar) findViewById(R.id.seekBar);
@@ -174,7 +168,7 @@ public class MainActivity extends Activity
     	Log.d(LOG_TAG, "StartPedometerService");
     }
     
-    public void ResetSteps (View view) 
+    public void resetSteps () 
     {
     	//pedometerService.setNumSteps(0);
     	//textViewSteps.setText(String.valueOf(pedometerService.getNumSteps()));
@@ -183,8 +177,8 @@ public class MainActivity extends Activity
     	Bundle extras = new Bundle();
     	extras.putInt("threshold_val", threshold);
     	extras.putInt("numSteps_val", 0);
-    	mResetSteps.putExtras(extras);
-    	sendBroadcast(mResetSteps);
+    	mServiceIntent.putExtras(extras);
+    	sendBroadcast(mServiceIntent);
     	
     }
     
@@ -240,32 +234,22 @@ public class MainActivity extends Activity
     }
     
     
-    private OnSeekBarChangeListener seekBarListener = new OnSeekBarChangeListener()
-    {
-
-		@Override
-		public void onProgressChanged(SeekBar arg0, int arg1, boolean arg2) {
-			threshold = seekBar.getProgress();
-			textViewSensitivity.setText(String.valueOf(threshold));
-			
-			
-		}
-
-		@Override
-		public void onStartTrackingTouch(SeekBar arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void onStopTrackingTouch(SeekBar arg0) {
-			// TODO Auto-generated method stub
-			Bundle extras = new Bundle();
-	    	extras.putInt("threshold_val", threshold);
-	    	mSetTreshold.putExtras(extras);
-	    	sendBroadcast(mSetTreshold);
-		}
-    	
-    };
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+	//public class MyReceiver extends 
 	
 }

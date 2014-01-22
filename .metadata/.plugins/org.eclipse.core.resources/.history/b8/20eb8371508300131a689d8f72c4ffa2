@@ -32,7 +32,7 @@ public class PedometerBackgroundService extends Service
 	
 	
 	
-	private BroadcastReceiver resetStepsReceiver = new BroadcastReceiver ()
+	private BroadcastReceiver myReceiver = new BroadcastReceiver ()
 	{
 		static final String LOG_TAG = "MyReceiver";
 
@@ -83,10 +83,6 @@ public class PedometerBackgroundService extends Service
             threshold = bundle.getInt("threshold_val");
         }
         Toast.makeText(getApplicationContext(), "threshold:"+threshold, Toast.LENGTH_SHORT).show();
-        
-        intentFilter.addAction(MainActivity.RESET_STEPS);
-	    registerReceiver(resetStepsReceiver, intentFilter);
-        
         return START_STICKY;
 	}
 	
