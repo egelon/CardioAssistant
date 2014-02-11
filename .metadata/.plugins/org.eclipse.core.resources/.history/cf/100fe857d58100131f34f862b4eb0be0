@@ -1,8 +1,0 @@
-package com.egelon.cardioassistant;
-
-
-import android.app.IntentService;;
-
-public class PedometerBackgroundWorker IntentService {
-
-}
